@@ -1,6 +1,5 @@
 package advisor;
 
-import httpClient.Request;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -27,7 +26,6 @@ public class Main {
                 server_path = args[i+1];
             }
         }
-        createServer();
         commandProcessor();
     }
     private static void createServer() throws IOException {
@@ -87,19 +85,19 @@ public class Main {
                 }
             }
             if(action.equals("auth")){
+                createServer();
                 server.start();
 
                 System.out.println("use this link to request the access code:");
                 System.out.println(auth_link);
                 Authentication authentication = new Authentication(auth_link, httpserver);
                 if(authentication.responseCode == 200) {
-                    String query = httpserver.query;
-                    while (query.isEmpty()) {
+                    String query = "";
+                    while (query.equals("")) {
                         query = httpserver.query;
+                        //System.out.println(query);
                         Thread.sleep(1000);
                     }
-                    server.stop(0);
-                    System.out.println(query);
                     query = query.split("=")[1];
                     System.out.println("making http request for access_token...");
                     AccessToken accessToken = new AccessToken(query);

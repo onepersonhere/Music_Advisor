@@ -303,9 +303,6 @@ files:
         }
     }
   learner_created: false
-- name: src/httpClient/Request.java
-  visible: true
-  learner_created: true
 - name: src/advisor/Authentication.java
   visible: true
   learner_created: true
@@ -316,5 +313,8 @@ files:
   visible: true
   learner_created: true
 feedback_link: https://hyperskill.org/projects/62/stages/337/implement#comment
-status: Unchecked
-record: -1
+status: Solved
+feedback:
+  message: Congratulations!
+  time: Sun, 04 Jul 2021 09:29:16 UTC
+record: 3

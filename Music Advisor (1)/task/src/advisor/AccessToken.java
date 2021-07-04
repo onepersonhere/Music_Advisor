@@ -22,7 +22,6 @@ public class AccessToken {
                                 "&code="+query
                                 +"&redirect_uri="+"http://localhost:5001"))
                 .build();
-        System.out.println(request);
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         System.out.println(response.body());
     }
