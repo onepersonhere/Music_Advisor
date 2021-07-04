@@ -5,6 +5,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
+import javax.management.timer.Timer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Scanner;
@@ -12,32 +13,29 @@ import java.util.Scanner;
 public class Main {
     private static String access_token = "";
     private static boolean auth = false;
-    private static final String client_id = "d644546874e74c11af7ebbc3b04608c7";
-    private static final String client_secret = "7050d04f770c4b84873a83857286b995";
-    private static final String redirect_uri = "http://localhost:5001&response_type=code";
-    private static final String auth_link = "https://accounts.spotify.com/authorize?client_id="+client_id+"&redirect_uri="+redirect_uri;
+    public static final String client_id = "d644546874e74c11af7ebbc3b04608c7";
+    public static final String client_secret = "7050d04f770c4b84873a83857286b995";
+    public static final String redirect_uri = "http://localhost:5001&response_type=code";
+    public static String server_path = "https://accounts.spotify.com";
+    private static final String auth_link = server_path+"/authorize?client_id="+client_id+"&redirect_uri="+redirect_uri;
     private static HttpServer server;
+    private static Server httpserver;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
+        for(int i = 0; i < args.length; i+=2){
+            if(args[i].equals("-access")){
+                server_path = args[i+1];
+            }
+        }
         createServer();
-        server.start();
+        commandProcessor();
+    }
+    private static void createServer() throws IOException {
+        httpserver= new Server();
+        server = httpserver.createServer();
     }
 
-    private static void createServer() throws IOException {
-        server = HttpServer.create();
-        server.bind(new InetSocketAddress(5001), 0);
-        server.createContext("/",
-                new HttpHandler() {
-                    @Override
-                    public void handle(HttpExchange exchange) throws IOException {
-                        String query = exchange.getRequestURI().getQuery();
-                        exchange.sendResponseHeaders(200, query.length());
-                        exchange.getResponseBody().write(query.getBytes());
-                        exchange.getResponseBody().close();
-                    }
-                });
-    }
-    private static void commandProcessor(){
+    private static void commandProcessor() throws IOException, InterruptedException {
         Scanner scanner = new Scanner(System.in);
         while(true){
             String action = scanner.nextLine();
@@ -89,9 +87,25 @@ public class Main {
                 }
             }
             if(action.equals("auth")){
+                server.start();
+
+                System.out.println("use this link to request the access code:");
                 System.out.println(auth_link);
-                auth = true;
-                System.out.println("---SUCCESS---");
+                Authentication authentication = new Authentication(auth_link, httpserver);
+                if(authentication.responseCode == 200) {
+                    String query = httpserver.query;
+                    while (query.isEmpty()) {
+                        query = httpserver.query;
+                        Thread.sleep(1000);
+                    }
+                    server.stop(0);
+                    System.out.println(query);
+                    query = query.split("=")[1];
+                    System.out.println("making http request for access_token...");
+                    AccessToken accessToken = new AccessToken(query);
+                    auth = true;
+                    System.out.println("---SUCCESS---");
+                }
             }
             if (action.equals("exit")) {
                 System.out.println("---GOODBYE!---");
