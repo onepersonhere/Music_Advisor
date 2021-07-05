@@ -10,7 +10,6 @@ import java.net.InetSocketAddress;
 import java.util.Scanner;
 
 public class Main {
-    private static String access_token = "";
     private static boolean auth = false;
     public static final String client_id = "d644546874e74c11af7ebbc3b04608c7";
     public static final String client_secret = "7050d04f770c4b84873a83857286b995";
@@ -19,11 +18,15 @@ public class Main {
     private static final String auth_link = server_path+"/authorize?client_id="+client_id+"&redirect_uri="+redirect_uri;
     private static HttpServer server;
     private static Server httpserver;
+    public static String api_path = "https://api.spotify.com";
 
     public static void main(String[] args) throws IOException, InterruptedException {
         for(int i = 0; i < args.length; i+=2){
             if(args[i].equals("-access")){
                 server_path = args[i+1];
+            }
+            if(args[i].equals("-resource")){
+                api_path = args[i+1];
             }
         }
         commandProcessor();
@@ -40,11 +43,8 @@ public class Main {
             String[] actionArr = action.split(" ");
             if (action.equals("new")) {
                 if(auth){
-                    System.out.println("---NEW RELEASES---\n" +
-                            "Mountains [Sia, Diplo, Labrinth]\n" +
-                            "Runaway [Lil Peep]\n" +
-                            "The Greatest Show [Panic! At The Disco]\n" +
-                            "All Out Life [Slipknot]");
+                    String req = getRequests.Request(api_path + "/v1/browse/new-releases", "new");
+                    System.out.print(req);
                 }else{
                     System.out.println("Please, provide access for application.");
                 }
@@ -52,34 +52,35 @@ public class Main {
             }
             if (action.equals("featured")) {
                 if(auth) {
-                    System.out.println("---FEATURED---\n" +
-                            "Mellow Morning\n" +
-                            "Wake Up and Smell the Coffee\n" +
-                            "Monday Motivation\n" +
-                            "Songs to Sing in the Shower");
+                    String req = getRequests.Request(api_path + "/v1/browse/featured-playlists", "featured");
+                    System.out.print(req);
                 }else{
                     System.out.println("Please, provide access for application.");
                 }
             }
             if (action.equals("categories")) {
                 if(auth) {
-                    System.out.println("---CATEGORIES---\n" +
-                            "Top Lists\n" +
-                            "Pop\n" +
-                            "Mood\n" +
-                            "Latin");
+                    String req = getRequests.Request(api_path + "/v1/browse/categories", "categories");
+                    System.out.print(req);
                 }else{
                     System.out.println("Please, provide access for application.");
                 }
             }
             if (actionArr[0].equals("playlists")) {
                 if(auth) {
-                    System.out.println("---" + actionArr[1] + " PLAYLISTS---\n" +
-                            "Walk Like A Badass  \n" +
-                            "Rage Beats  \n" +
-                            "Arab Mood Booster  \n" +
-                            "Sunday Stroll\n" +
-                            "> exit");
+                    String category = "";
+                    for(int i = 1; i < actionArr.length; i++){
+                        category += actionArr[i] + " ";
+                    }
+                    category = category.trim();
+                    //request category_id
+                    String category_id = getRequests.requestID(category);
+                    if(category_id.equals("Unknown category name.") || category_id.equals("Specified id doesn't exist")){
+                        System.out.println(category_id);
+                    }else {
+                        String req = getRequests.Request(api_path + "/v1/browse/categories/" + category_id + "/playlists", "playlist");
+                        System.out.print(req);
+                    }
                 }else{
                     System.out.println("Please, provide access for application.");
                 }

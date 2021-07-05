@@ -970,6 +970,15 @@ files:
         }
     }
   learner_created: true
+- name: src/advisor/getRequests.java
+  visible: true
+  learner_created: true
+- name: src/advisor/codeStorage.txt
+  visible: true
+  learner_created: true
 feedback_link: https://hyperskill.org/projects/62/stages/338/implement#comment
-status: Unchecked
-record: -1
+status: Solved
+feedback:
+  message: Congratulations!
+  time: Mon, 05 Jul 2021 03:44:27 UTC
+record: 4
