@@ -7,6 +7,8 @@ import com.sun.net.httpserver.HttpServer;
 import javax.management.timer.Timer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -20,6 +22,9 @@ public class Main {
     private static Server httpserver;
     public static String api_path = "https://api.spotify.com";
 
+    public static int page = 5;
+    private static List<String> list = new ArrayList<>();
+
     public static void main(String[] args) throws IOException, InterruptedException {
         for(int i = 0; i < args.length; i+=2){
             if(args[i].equals("-access")){
@@ -27,6 +32,9 @@ public class Main {
             }
             if(args[i].equals("-resource")){
                 api_path = args[i+1];
+            }
+            if(args[i].equals("-page")){
+                page = Integer.parseInt(args[i+1]);
             }
         }
         commandProcessor();
@@ -36,15 +44,43 @@ public class Main {
         server = httpserver.createServer();
     }
 
+    static int pageNum = 0;
+    private static void print(){
+        String printer = "";
+        for(int i = pageNum*page; i < pageNum*page+page; i++){
+            printer += list.get(i);
+        }
+        String pager = "---PAGE "+ (pageNum+1) +" OF " + (list.size()/page) + "---";
+        System.out.println(printer + pager);
+    }
     private static void commandProcessor() throws IOException, InterruptedException {
         Scanner scanner = new Scanner(System.in);
         while(true){
             String action = scanner.nextLine();
             String[] actionArr = action.split(" ");
+            if (action.equals("next")){
+                if(pageNum+1 >= list.size()/page){
+                    System.out.println("No more pages.");
+                    pageNum = list.size()/page - 1;
+                }else {
+                    pageNum++;
+                    print();
+                }
+            }
+            if (action.equals("prev")){
+                if(pageNum <= 0){
+                    System.out.println("No more pages.");
+                    pageNum = 0;
+                }else {
+                    pageNum--;
+                    print();
+                }
+            }
             if (action.equals("new")) {
                 if(auth){
-                    String req = getRequests.Request(api_path + "/v1/browse/new-releases", "new");
-                    System.out.print(req);
+                    list = getRequests.Request(api_path + "/v1/browse/new-releases", "new");
+                    pageNum = 0;
+                    print();
                 }else{
                     System.out.println("Please, provide access for application.");
                 }
@@ -52,16 +88,18 @@ public class Main {
             }
             if (action.equals("featured")) {
                 if(auth) {
-                    String req = getRequests.Request(api_path + "/v1/browse/featured-playlists", "featured");
-                    System.out.print(req);
+                    list = getRequests.Request(api_path + "/v1/browse/featured-playlists", "featured");
+                    pageNum = 0;
+                    print();
                 }else{
                     System.out.println("Please, provide access for application.");
                 }
             }
             if (action.equals("categories")) {
                 if(auth) {
-                    String req = getRequests.Request(api_path + "/v1/browse/categories", "categories");
-                    System.out.print(req);
+                    list = getRequests.Request(api_path + "/v1/browse/categories", "categories");
+                    pageNum = 0;
+                    print();
                 }else{
                     System.out.println("Please, provide access for application.");
                 }
@@ -78,8 +116,9 @@ public class Main {
                     if(category_id.equals("Unknown category name.") || category_id.equals("Specified id doesn't exist")){
                         System.out.println(category_id);
                     }else {
-                        String req = getRequests.Request(api_path + "/v1/browse/categories/" + category_id + "/playlists", "playlist");
-                        System.out.print(req);
+                        list = getRequests.Request(api_path + "/v1/browse/categories/" + category_id + "/playlists", "playlist");
+                        pageNum = 0;
+                        print();
                     }
                 }else{
                     System.out.println("Please, provide access for application.");

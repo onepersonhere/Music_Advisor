@@ -14,7 +14,7 @@ import java.util.*;
 
 public class getRequests {
     public static Map<String, String> listOfIDs = new HashMap<>();
-    public static String Request(String link, String Category) throws IOException, InterruptedException { //use gson parser
+    public static List<String> Request(String link, String Category) throws IOException, InterruptedException { //use gson parser
         HttpClient client = HttpClient.newBuilder().build();
         HttpRequest request = HttpRequest.newBuilder()
                 .header("Authorization", "Bearer " + AccessToken.accessToken)
@@ -56,7 +56,7 @@ public class getRequests {
         }
         return "Unknown category name.";
     }
-    private static String JsonParser(String json, String Category){
+    private static List<String> JsonParser(String json, String Category){
         if(Category.equals("new")){
             return newRelease(json);
         }
@@ -69,92 +69,94 @@ public class getRequests {
         if(Category.equals("playlist")){
             return playlists(json);
         }
-        return "";
+        return new ArrayList<>();
     }
 
-    private static String newRelease(String json){
+    private static List<String> newRelease(String json){
         JsonObject jo = JsonParser.parseString(json).getAsJsonObject();
         jo = jo.getAsJsonObject("albums");
-        String returnVal = "";
+        List<String> list = new ArrayList<>();
 
         for(JsonElement item : jo.getAsJsonArray("items")){
             JsonObject object = item.getAsJsonObject();
             String name = object.get("name").getAsString();
-
+            //artist
             JsonArray artist = object.getAsJsonArray("artists");
             String artists = "[";
             for(int i = 0; i < artist.size(); i++){
                 JsonObject artistObj = artist.get(i).getAsJsonObject();
                 artists += artistObj.get("name") + ", ";
             }
-
             artists = artists.replaceAll("\"", "");
             artists = artists.replaceAll(", $", "");
             artists += "]";
-
+            //url
             JsonObject href = object.get("external_urls").getAsJsonObject();
             String link = href.get("spotify").getAsString();
 
-            returnVal += name + "\n" + artists + "\n" + link + "\n\n";
+            String returnVal = name + "\n" + artists + "\n" + link + "\n\n";
+            list.add(returnVal);
         }
 
-        return returnVal;
+        return list;
     }
 
-    private static String featuredPlaylists(String json){
+    private static List<String> featuredPlaylists(String json){
+        List<String> list = new ArrayList<>();
         JsonObject jo = JsonParser.parseString(json).getAsJsonObject();
         jo = jo.getAsJsonObject("playlists");
-        String returnVal = "";
+
         for(JsonElement item : jo.getAsJsonArray("items")){
             JsonObject object = item.getAsJsonObject();
             String name = object.get("name").getAsString();
             JsonObject href = object.get("external_urls").getAsJsonObject();
             String link = href.get("spotify").getAsString();
 
-            returnVal += name + "\n" + link + "\n\n";
+            String returnVal = name + "\n" + link + "\n\n";
+            list.add(returnVal);
         }
 
-        return returnVal;
+        return list;
     }
 
-    private static String categories(String json){
+    private static List<String> categories(String json){
+        List<String> list = new ArrayList<>();
         JsonObject jo = JsonParser.parseString(json).getAsJsonObject();
         jo = jo.getAsJsonObject("categories");
-        String returnVal = "";
 
         for(JsonElement item : jo.getAsJsonArray("items")){
             JsonObject object = item.getAsJsonObject();
             String name = object.get("name").getAsString();
-            returnVal += name + "\n";
+            String returnVal = name + "\n";
 
             String id = object.get("id").getAsString();
             listOfIDs.put(name, id);
             //System.out.println(id);
+            list.add(name);
         }
 
-        return returnVal;
+        return list;
     }
 
-    private static String playlists(String json){
-
+    private static List<String> playlists(String json){
+        List<String> list = new ArrayList<>();
         JsonObject jo = JsonParser.parseString(json).getAsJsonObject();
         if(json.contains("error")){
             System.out.println(json);
-            return "";
+            return list;
         }
         jo = jo.getAsJsonObject("playlists");
-
-        String returnVal = "";
 
         for(JsonElement item : jo.getAsJsonArray("items")){
             JsonObject object = item.getAsJsonObject();
             String name = object.get("name").getAsString();
             JsonObject href = object.get("external_urls").getAsJsonObject();
             String link = href.get("spotify").getAsString();
-            returnVal += name + "\n" + link + "\n\n";
+            String returnVal = name + "\n" + link + "\n\n";
+            list.add(returnVal);
         }
 
-        return returnVal;
+        return list;
     }
 
 }
