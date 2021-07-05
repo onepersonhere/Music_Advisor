@@ -13,8 +13,8 @@ import java.util.Scanner;
 
 public class Main {
     private static boolean auth = false;
-    public static final String client_id = "d644546874e74c11af7ebbc3b04608c7";
-    public static final String client_secret = "7050d04f770c4b84873a83857286b995";
+    public static final String client_id = "omitted";
+    public static final String client_secret = "omitted";
     public static final String redirect_uri = "http://localhost:5001&response_type=code";
     public static String server_path = "https://accounts.spotify.com";
     private static final String auth_link = server_path+"/authorize?client_id="+client_id+"&redirect_uri="+redirect_uri;
